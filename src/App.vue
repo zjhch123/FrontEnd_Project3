@@ -148,7 +148,7 @@ $rotateDuration: 180s;
   width: 2440px;
   height: 1514px;
   overflow: hidden;
-  background: url(./assets/background.png) no-repeat center center;
+  background: url('./assets/background.png') no-repeat center center;
   .f-label, .stage {
     pointer-events: none;
   }
