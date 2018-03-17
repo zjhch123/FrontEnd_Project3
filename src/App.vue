@@ -30,21 +30,18 @@
       <img src="./assets/label10.png" class="f-label f-index3 m-label10"/>
       <img src="./assets/label11.png" class="f-label f-index2 m-label11"/>
       <div
-        class="m-ball-position f-index7"
-        :ref="`ballPosition`">
-        <div
-          class="m-ball-container"
-          :class="isPause ? 'paused' : ''">
-          <div v-for="(i) in 10"
-              :key="i"
-              :class="`m-ball m-ball${i} f-index${10-i} ${isSelected && selectedIndex != i ? 'fadeOut' : ''}`"
-              @click.stop="clickBall(i)"
-              :ref="`ball${i}`">
-            <div class="u-ball">
-              <img :src="require(`./assets/ball${i}-outer.png`)" class="u-outer" />
-              <img :src="require(`./assets/ball${i}-inner.png`)" class="u-inner"/>
-              <img :src="require(`./assets/ball${i}-word.png`)" class="u-word"/>
-            </div>
+        :ref="'ballContainer'"
+        class="m-ball-container f-index5"
+        :class="isPause ? 'paused' : ''">
+        <div v-for="(i) in 10"
+            :key="i"
+            :class="`m-ball m-ball${i} f-index${10-i} ${isSelected && selectedIndex != i ? 'fadeOut' : ''}`"
+            @click.stop="clickBall(i)"
+            :ref="`ball${i}`">
+          <div class="u-ball">
+            <img :src="require(`./assets/ball${i}-outer.png`)" class="u-outer" />
+            <img :src="require(`./assets/ball${i}-inner.png`)" class="u-inner"/>
+            <img :src="require(`./assets/ball${i}-word.png`)" class="u-word"/>
           </div>
         </div>
       </div>
@@ -78,30 +75,51 @@ export default {
     }
   },
   methods: {
+    getContainerRotateDeg () {
+      const matrix = new DOMMatrix(window.getComputedStyle(this.$refs.ballContainer).transform)
+      const cosVal = matrix.a
+      const sinVal = matrix.b
+      if (sinVal > 0) {
+        return this.calcDegFromArc(Math.acos(cosVal))
+      } else {
+        return 180 - this.calcDegFromArc(Math.acos(cosVal)) + 180
+      }
+    },
+    calcDegFromArc (r) {
+      return 180 * r / Math.PI
+    },
+    calcArcFromDeg (deg) {
+      return Math.PI / 180 * deg
+    },
+    calcTransform () {
+      const d = 600
+      const alpha = -60
+      return `translate(${-Math.cos(this.calcArcFromDeg(90 + alpha - this.getContainerRotateDeg())) * d}px, ${-Math.sin(this.calcArcFromDeg(90 + alpha - this.getContainerRotateDeg())) * d}px) scale(1.3)`
+    },
     clickBall (index) {
       this.isPause = true
       this.isSelected = true
       this.selectedIndex = index
       setTimeout(() => {
-        this.$refs[`ball${index}`][0].style.transform = 'none'
-        this.$refs.ballPosition.style.transform = `translate(-536px, -193px) scale(1.2)`
+        this.$refs[`ball${index}`][0].style.transition = 'all 1s ease-in-out'
+        this.$refs[`ball${index}`][0].style.transform = this.calcTransform()
       }, 800)
       setTimeout(() => {
         this.showVideo = true
-      }, 1700)
+      }, 2000)
     },
     reset () {
       if (this.isSelected) {
         this.showVideo = false
         setTimeout(() => {
-          this.$refs.ballPosition.style.transform = 'none'
-          this.$refs[`ball${this.selectedIndex}`][0].removeAttribute('style')
+          this.$refs[`ball${this.selectedIndex}`][0].style.transform = ''
         }, 800)
         setTimeout(() => {
+          this.$refs[`ball${this.selectedIndex}`][0].style.transition = ''
           this.isPause = false
           this.isSelected = false
           this.selectedIndex = -1
-        }, 1600)
+        }, 1900)
       }
     }
   }
