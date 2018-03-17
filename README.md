@@ -2,6 +2,9 @@
 
 > A Vue.js project
 
+## 为什么是Project 3?
+没有任何意义，随便想的数字。
+
 ## Build Setup
 
 ``` bash
