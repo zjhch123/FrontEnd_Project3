@@ -46,10 +46,11 @@
         </div>
       </div>
       <div class="m-video f-index6" :class="showVideo ? 'show' : ''">
-        <video src="" class="u-video"/>
+        <video :src="videoSrc" controls="controls" preload="auto" class="u-video" ref="video">
+        </video>
         <div class="u-controller">
-          <img src="./assets/player.png" class="u-player" />
-          <a href="javascript:;" class="u-start"></a>
+          <img src="./assets/player.png" class="u-player"/>
+          <a href="javascript:;" :class="!isPlaying ? 'u-start' : 'u-pause'" @click="switchStatus"></a>
         </div>
       </div>
     </div>
@@ -62,17 +63,36 @@ export default {
   name: 'App',
   data: function () {
     return {
-      balls: [],
+      balls: [''],
       isPause: false,
       isSelected: false,
       selectedIndex: -1,
-      showVideo: false
+      showVideo: false,
+      videoSrc: '',
+      isPlaying: false,
+      canCancel: false
+    }
+  },
+  watch: {
+    isPlaying (newVal) {
+      if (newVal) {
+        this.$refs['video'].play()
+      } else {
+        this.$refs['video'].pause()
+      }
     }
   },
   mounted: function () {
     for (let i = 1; i < 11; i++) {
       this.balls.push(this.$refs[`ball${i}`][0])
     }
+    setInterval(() => {
+      if (this.$refs.video.paused) {
+        this.isPlaying = false
+      } else {
+        this.isPlaying = true
+      }
+    }, 300)
   },
   methods: {
     getContainerRotateDeg () {
@@ -92,34 +112,59 @@ export default {
       return Math.PI / 180 * deg
     },
     calcTransform () {
-      const d = 600
+      const d = 580
       const alpha = -60
       return `translate(${-Math.cos(this.calcArcFromDeg(90 + alpha - this.getContainerRotateDeg())) * d}px, ${-Math.sin(this.calcArcFromDeg(90 + alpha - this.getContainerRotateDeg())) * d}px) scale(1.3)`
     },
     clickBall (index) {
-      this.isPause = true
-      this.isSelected = true
-      this.selectedIndex = index
-      setTimeout(() => {
-        this.$refs[`ball${index}`][0].style.transition = 'all 1s ease-in-out'
-        this.$refs[`ball${index}`][0].style.transform = this.calcTransform()
-      }, 800)
-      setTimeout(() => {
-        this.showVideo = true
-      }, 2000)
+      if (!this.canCancel) {
+        this.canCancel = false
+        this.isPause = true
+        this.isSelected = true
+        this.selectedIndex = index
+        this.videoSrc = `https://static.hduzplus.xyz/video/${index}.mp4`
+        this.isPlaying = false
+        setTimeout(() => {
+          this.balls[index].style.transition = 'all 1s ease-in-out'
+          this.balls[index].style.transform = this.calcTransform()
+        }, 600)
+        setTimeout(() => {
+          this.showVideo = true
+          setTimeout(() => {
+            this.canCancel = true
+          }, 1000)
+        }, 1500)
+      }
     },
     reset () {
-      if (this.isSelected) {
+      if (this.isSelected && this.canCancel) {
+        this.canCancel = true
         this.showVideo = false
+        this.isPlaying = false
         setTimeout(() => {
-          this.$refs[`ball${this.selectedIndex}`][0].style.transform = ''
-        }, 800)
+          if (typeof this.balls[this.selectedIndex] !== 'undefined') {
+            this.balls[this.selectedIndex].style.transform = ''
+          }
+        }, 600)
         setTimeout(() => {
-          this.$refs[`ball${this.selectedIndex}`][0].style.transition = ''
+          if (typeof this.balls[this.selectedIndex] !== 'undefined') {
+            this.balls[this.selectedIndex].style.transition = ''
+            this.videoSrc = ''
+          }
           this.isPause = false
           this.isSelected = false
           this.selectedIndex = -1
-        }, 1900)
+          setTimeout(() => {
+            this.canCancel = false
+          }, 1000)
+        }, 1500)
+      }
+    },
+    switchStatus () {
+      if (this.isPlaying) {
+        this.isPlaying = false
+      } else {
+        this.isPlaying = true
       }
     }
   }
@@ -511,7 +556,7 @@ $rotateDuration: 180s;
     .m-video {
       position: absolute;
       left: 827px;
-      top: 540px;
+      top: 480px;
       transform: translateY(-40px);
       opacity: 0;
       pointer-events: none;
@@ -523,8 +568,8 @@ $rotateDuration: 180s;
       }
       .u-video {
         width: 1135px;
-        height: 635px;
-        background-color: white;
+        // height: 635px;
+        // background-color: white;
       }
       .u-controller {
         margin-top: 53px;
@@ -543,6 +588,16 @@ $rotateDuration: 180s;
           background-image: url(./assets/start_normal.png);
           &:hover {
             background-image: url(./assets/start_hover.png);
+          }
+        }
+        .u-pause {
+          width: 239px;
+          height: 100px;
+          display: inline-block;
+          background-size: 239px 100px;
+          background-image: url(./assets/pause_normal.png);
+          &:hover {
+            background-image: url(./assets/pause_hover.png);
           }
         }
       }
