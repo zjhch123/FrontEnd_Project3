@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" ref="app">
     <img src="./assets/background-point.png" class="m-background-point" />
     <div class="g-container"
          @click.self="reset">
@@ -58,7 +58,6 @@
 </template>
 
 <script>
-
 export default {
   name: 'App',
   data: function () {
@@ -86,8 +85,10 @@ export default {
     for (let i = 1; i < 11; i++) {
       this.balls.push(this.$refs[`ball${i}`][0])
     }
+    this.suit()
+    window.addEventListener('resize', this.suit.bind(this))
     setInterval(() => {
-      if (this.$refs.video.paused) {
+      if (this.$refs.video && this.$refs.video.paused) {
         this.isPlaying = false
       } else {
         this.isPlaying = true
@@ -95,6 +96,31 @@ export default {
     }, 300)
   },
   methods: {
+    suit () {
+      const documentWidth = document.documentElement.clientWidth
+      const documentHeight = document.documentElement.clientHeight
+
+      const targetWidth = 7250
+      const targetHeight = 4500
+
+      let scale = 1
+
+      if (targetHeight / targetWidth < documentHeight / documentWidth) {
+        scale = 1 / (targetWidth / documentWidth)
+      } else {
+        scale = 1 / (targetHeight / documentHeight)
+      }
+
+      const scaleWidth = targetWidth * scale
+      const scaleHeight = targetHeight * scale
+
+      const left = (documentWidth - scaleWidth) / 2
+      const top = (documentHeight - scaleHeight) / 2
+
+      this.$refs.app.style.transform = `scale(${scale})`
+      this.$refs.app.style.left = `${left}px`
+      this.$refs.app.style.top = `${top}px`
+    },
     getContainerRotateDeg () {
       const matrix = new DOMMatrix(window.getComputedStyle(this.$refs.ballContainer).transform)
       const cosVal = matrix.a
@@ -112,8 +138,8 @@ export default {
       return Math.PI / 180 * deg
     },
     calcTransform () {
-      const d = 580
-      const alpha = -60
+      const d = 1640
+      const alpha = -70
       return `translate(${-Math.cos(this.calcArcFromDeg(90 + alpha - this.getContainerRotateDeg())) * d}px, ${-Math.sin(this.calcArcFromDeg(90 + alpha - this.getContainerRotateDeg())) * d}px) scale(1.3)`
     },
     clickBall (index) {
@@ -172,7 +198,7 @@ export default {
 </script>
 
 <style lang="scss">
-$radius: 620px;
+$radius: 1860px;
 $scale: 1.1;
 $rotateDuration: 180s;
 
@@ -207,22 +233,24 @@ $rotateDuration: 180s;
   }
 }
 #app {
-  position: relative;
-  width: 2440px;
-  height: 1514px;
+  transform-origin: left top;
+  position: absolute;
+  width: 7250px;
+  height: 4500px;
   overflow: hidden;
   background: url('./assets/background.png') no-repeat center center;
+  transition: transform .5s linear;
   .f-label, .stage {
     pointer-events: none;
   }
   .m-background-point {
-    width: 2383px;
-    height: 1488px;
+    width: 7077px;
+    height: 4420px;
     position: absolute;
     left: 50%;
     top: 50%;
-    margin-left: -1191px;
-    margin-top: -744px;
+    margin-left: -3538px;
+    margin-top: -2210px;
     animation: fadeIn 4s;
     pointer-events: none;
   }
@@ -266,40 +294,40 @@ $rotateDuration: 180s;
     height: 100%;
     overflow: hidden;
     .m-label1 {
-      right: 116px;
+      right: 345px;
       top: 0;
-      width: 834px;
-      height: 227px;
+      width: 2475px;
+      height: 672px;
     }
     .m-label2 {
-      right: 46px;
-      bottom: 17px;
-      width: 327px;
-      height: 192px;
+      right: 137px;
+      bottom: 35px;
+      width: 971px;
+      height: 567px;
     }
     .m-label3 {
-      width: 389px;
-      height: 322px;
+      width: 1154px;
+      height: 953px;
       right: 0;
-      top: 28px;
+      top: 85px;
     }
     .m-label4 {
-      width: 292px;
-      height: 750px;
-      right: 93px;
-      top: 312px;
+      width: 864px;
+      height: 2277px;
+      right: 280px;
+      top: 935px;
     }
     .m-label5 {
-      width: 762px;
-      height: 411px;
-      top: 200px;
-      left: 30px;
+      width: 2260px;
+      height: 1217px;
+      top: 600px;
+      left: 90px;
     }
     .m-label6 {
-      width: 401px;
-      height: 402px;
-      left: 16px;
-      bottom: 39px;
+      width: 1187px;
+      height: 1193px;
+      left: 50px;
+      bottom: 117px;
     }
     .stage {
       perspective: 2000px;
@@ -309,6 +337,8 @@ $rotateDuration: 180s;
       position:absolute;
       left: 120px;
       top: -40px;
+      transform: scale(3);
+      transform-origin: left top;
       .m-label7 {
         left: -30px;
         top: 50px;
@@ -362,36 +392,35 @@ $rotateDuration: 180s;
       }
     }
     .m-label8 {
-      width: 539px;
-      height: 455px;
-      left: 20px;
+      width: 1596px;
+      height: 1351px;
+      left: 60px;
       top: 0;
     }
     .m-label9 {
-      width: 1338px;
-      height: 1342px;
+      width: 3974px;
+      height: 3986px;
       left: 50%;
       top: 50%;
-      margin-left: -669px;
-      margin-top: -671px;
+      margin-left: -1987px;
+      margin-top: -1993px;
       animation: rotate 120s linear;
       animation-iteration-count: infinite;
     }
     .m-label10 {
-      width: 1008px;
-      height: 1006px;
+      width: 2990px;
+      height: 2990px;
       left: 50%;
       top: 50%;
-      margin-left: -504px;
-      margin-top: -503px;
+      margin-left: -1495px;
+      margin-top: -1495px;
       animation: rotate 120s linear reverse;
       animation-iteration-count: infinite;
     }
     .m-label11 {
-      width: 2129px;
-      height: 1096px;
-      margin-left: -1064px;
-      margin-top: -548px;
+      width: 6324px;
+      height: 3174px;
+      transform: translate(-50%, -50%);
       left: 50%;
       top: 50%;
     }
@@ -448,106 +477,106 @@ $rotateDuration: 180s;
       }
       .u-word {
         position: absolute;
-        top: 42px;
-        left: 160px;
+        top: 126px;
+        left: 480px;
         pointer-events: none;
       }
     }
     .m-ball1 {
-      width: 356px;
-      height: 357px;
-      margin-left: half(-356px);
-      margin-top: half(-357px);
+      width: 1055px;
+      height: 1056px;
+      margin-left: half(-1055px);
+      margin-top: half(-1056px);
       transform: translate($radius, 0);
       &:hover {
         transform: translate($radius, 0) scale($scale);
       }
     }
     .m-ball2 {
-      width: 356px;
-      height: 357px;
-      margin-left: half(-356px);
-      margin-top: half(-357px);
+      width: 1056px;
+      height: 1044px;
+      margin-left: half(-1056px);
+      margin-top: half(-1044px);
       transform: translate(getLeft(1), getTop(1));
       &:hover {
         transform: translate(getLeft(1), getTop(1)) scale($scale);
       }
     }
     .m-ball3 {
-      width: 318px;
-      height: 317px;
-      margin-left: half(-318px);
-      margin-top: half(-317px);
+      width: 941px;
+      height: 941px;
+      margin-left: half(-941px);
+      margin-top: half(-941px);
       transform: translate(getLeft(2), getTop(2));
       &:hover {
         transform: translate(getLeft(2), getTop(2)) scale($scale);
       }
     }
     .m-ball4 {
-      width: 336px;
-      height: 308px;
-      margin-left: half(-336px);
-      margin-top: half(-308px);
+      width: 998px;
+      height: 911px;
+      margin-left: half(-998px);
+      margin-top: half(-911px);
       transform: translate(getLeft(3), getTop(3));
       &:hover {
         transform: translate(getLeft(3), getTop(3)) scale($scale);
       }
     }
     .m-ball5 {
-      width: 339px;
-      height: 339px;
-      margin-left: half(-339px);
-      margin-top: half(-339px);
+      width: 1005px;
+      height: 1005px;
+      margin-left: half(-1005px);
+      margin-top: half(-1005px);
       transform: translate(getLeft(4), getTop(4));
       &:hover {
         transform: translate(getLeft(4), getTop(4)) scale($scale);
       }
     }
     .m-ball6 {
-      width: 318px;
-      height: 317px;
-      margin-left: half(-318px);
-      margin-top: half(-317px);
+      width: 941px;
+      height: 942px;
+      margin-left: half(-941px);
+      margin-top: half(-942px);
       transform: translate(getLeft(5), getTop(5));
       &:hover {
         transform: translate(getLeft(5), getTop(5)) scale($scale);
       }
     }
     .m-ball7 {
-      width: 318px;
-      height: 317px;
-      margin-left: half(-318px);
-      margin-top: half(-317px);
+      width: 941px;
+      height: 942px;
+      margin-left: half(-941px);
+      margin-top: half(-942px);
       transform: translate(getLeft(6), getTop(6));
       &:hover {
         transform: translate(getLeft(6), getTop(6)) scale($scale);
       }
     }
     .m-ball8 {
-      width: 336px;
-      height: 308px;
-      margin-left: half(-336px);
-      margin-top: half(-308px);
+      width: 998px;
+      height: 911px;
+      margin-left: half(-998px);
+      margin-top: half(-911px);
       transform: translate(getLeft(7), getTop(7));
       &:hover {
         transform: translate(getLeft(7), getTop(7)) scale($scale);
       }
     }
     .m-ball9 {
-      width: 339px;
-      height: 339px;
-      margin-left: half(-339px);
-      margin-top: half(-339px);
+      width: 1005px;
+      height: 1005px;
+      margin-left: half(-1005px);
+      margin-top: half(-1005px);
       transform: translate(getLeft(8), getTop(8));
       &:hover {
         transform: translate(getLeft(8), getTop(8)) scale($scale);
       }
     }
     .m-ball10 {
-      width: 318px;
-      height: 317px;
-      margin-left: half(-318px);
-      margin-top: half(-317px);
+      width: 941px;
+      height: 942px;
+      margin-left: half(-941px);
+      margin-top: half(-942px);
       transform: translate(getLeft(9), getTop(9));
       &:hover {
         transform: translate(getLeft(9), getTop(9)) scale($scale);
@@ -555,8 +584,8 @@ $rotateDuration: 180s;
     }
     .m-video {
       position: absolute;
-      left: 827px;
-      top: 480px;
+      left: 2465px;
+      top: 1612px;
       transform: translateY(-40px);
       opacity: 0;
       pointer-events: none;
@@ -567,34 +596,32 @@ $rotateDuration: 180s;
         pointer-events: auto;
       }
       .u-video {
-        width: 1135px;
-        // height: 635px;
+        width: 3405px;
         // background-color: white;
       }
       .u-controller {
-        margin-top: 53px;
+        margin-top: 100px;
         text-align: right;
         font-size: 0;
         .u-player {
           display: inline-block;
-          margin-right: 10px;
-          width: 237px;
-          height: 95px;
+          margin-right: 90px;
+          width: 700px;
+          height: 280px;
+        }
+        .u-start, .u-pause {
+          width: 707px;
+          height: 293px;
+          display: inline-block;
+          background-size: 707px 293px;
         }
         .u-start {
-          width: 239px;
-          height: 100px;
-          display: inline-block;
           background-image: url(./assets/start_normal.png);
           &:hover {
             background-image: url(./assets/start_hover.png);
           }
         }
         .u-pause {
-          width: 239px;
-          height: 100px;
-          display: inline-block;
-          background-size: 239px 100px;
           background-image: url(./assets/pause_normal.png);
           &:hover {
             background-image: url(./assets/pause_hover.png);
